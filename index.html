@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paumanhin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sacramento&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FBF3E6;
+    --paper-dark: #F2E4D0;
+    --wine: #5C1A2B;
+    --wine-deep: #3D0F1C;
+    --rose: #D98A8A;
+    --rose-soft: #E8B9B9;
+    --gold: #C9A15A;
+    --ink: #3A2A2E;
+    --sky-1: #3D1F2E;
+    --sky-2: #6B2E3D;
+    --sky-3: #B85C6B;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    font-family:'EB Garamond', serif;
+    background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 45%, var(--sky-3) 100%);
+    color:var(--ink);
+    overflow-x:hidden;
+    min-height:100vh;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  /* ---------- floating hearts background ---------- */
+  #hearts{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:1;
+  }
+  .heart{
+    position:absolute;
+    bottom:-10%;
+    opacity:0;
+    animation: floatUp linear infinite;
+    color: var(--rose-soft);
+  }
+  @keyframes floatUp{
+    0%{ transform:translateY(0) translateX(0) rotate(0deg); opacity:0; }
+    10%{ opacity:0.55; }
+    90%{ opacity:0.4; }
+    100%{ transform:translateY(-115vh) translateX(var(--drift,20px)) rotate(25deg); opacity:0; }
+  }
+
+  /* ---------- stars ambience ---------- */
+  .star{
+    position:absolute;
+    background:#fff;
+    border-radius:50%;
+    opacity:0.5;
+    animation: twinkle 3.5s ease-in-out infinite;
+  }
+  @keyframes twinkle{
+    0%,100%{opacity:0.15;}
+    50%{opacity:0.7;}
+  }
+
+  section{
+    position:relative;
+    z-index:2;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px 20px;
+  }
+
+  /* ---------- HERO / ENVELOPE ---------- */
+  #hero{
+    flex-direction:column;
+    text-align:center;
+    gap:28px;
+  }
+  .eyebrow{
+    font-family:'EB Garamond', serif;
+    font-style:italic;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    font-size:0.8rem;
+    color:var(--rose-soft);
+    opacity:0.85;
+  }
+  .hero-title{
+    font-family:'Sacramento', cursive;
+    font-size:clamp(2.8rem, 9vw, 5.5rem);
+    color:#FBF3E6;
+    line-height:1;
+    text-shadow: 0 2px 18px rgba(0,0,0,0.25);
+  }
+  .hero-sub{
+    font-family:'Cormorant Garamond', serif;
+    font-size:clamp(1rem,2.4vw,1.25rem);
+    color:#F0DCC9;
+    max-width:420px;
+    font-style:italic;
+    opacity:0.9;
+  }
+
+  .envelope-wrap{
+    margin-top:10px;
+    cursor:pointer;
+    perspective:1200px;
+    user-select:none;
+  }
+  .envelope{
+    position:relative;
+    width:min(78vw, 300px);
+    height:min(52vw, 200px);
+    background: linear-gradient(155deg, #F5E6CF, #EAD3AE);
+    border-radius:6px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.35), 0 0 0 1px rgba(201,161,90,0.3) inset;
+    transition: transform 0.35s ease;
+  }
+  .envelope-wrap:hover .envelope{ transform: translateY(-6px) scale(1.02); }
+
+  .envelope::before{ /* bottom flap shading */
+    content:'';
+    position:absolute;
+    inset:0;
+    background:
+      linear-gradient(155deg, transparent 48%, rgba(92,26,43,0.08) 50%, transparent 52%);
+    border-radius:6px;
+  }
+  .flap{
+    position:absolute;
+    top:0; left:0; width:100%; height:100%;
+    clip-path: polygon(0 0, 100% 0, 50% 62%);
+    background: linear-gradient(160deg, #EFDBB8, #E2C293);
+    border-radius:6px 6px 0 0;
+    transform-origin: top center;
+    transition: transform 0.7s cubic-bezier(.6,.1,.2,1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15) inset;
+  }
+  .envelope.open .flap{
+    transform: rotateX(180deg);
+    z-index:5;
+  }
+  .seal{
+    position:absolute;
+    top:52%; left:50%;
+    transform:translate(-50%,-50%);
+    width:52px; height:52px;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, var(--rose), var(--wine) 75%);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+    display:flex;align-items:center;justify-content:center;
+    z-index:6;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+  }
+  .seal svg{ width:22px; height:22px; fill:#F0DCC9; }
+  .envelope.open .seal{ transform:translate(-50%,-50%) scale(0); opacity:0; }
+
+  .envelope-hint{
+    margin-top:16px;
+    font-size:0.85rem;
+    color:#E8CDB0;
+    letter-spacing:0.06em;
+    font-style:italic;
+    opacity:0.8;
+    animation: pulseHint 2.4s ease-in-out infinite;
+  }
+  @keyframes pulseHint{
+    0%,100%{opacity:0.55;}
+    50%{opacity:0.95;}
+  }
+  .scroll-cue{
+    position:absolute;
+    bottom:28px;
+    left:50%;
+    transform:translateX(-50%);
+    color:#E8CDB0;
+    opacity:0.75;
+    font-size:1.4rem;
+    animation: bob 2s ease-in-out infinite;
+  }
+  @keyframes bob{
+    0%,100%{ transform:translate(-50%,0); }
+    50%{ transform:translate(-50%,8px); }
+  }
+  .hidden-until-open{
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.6s ease;
+  }
+  .revealed{ opacity:1; pointer-events:auto; }
+
+  /* ---------- LETTER ---------- */
+  #letter-section{
+    align-items:flex-start;
+    padding-top:70px;
+  }
+  .letter-paper{
+    width:min(90vw, 640px);
+    margin:0 auto;
+    background: var(--paper);
+    background-image:
+      radial-gradient(rgba(92,26,43,0.03) 1px, transparent 1px);
+    background-size: 14px 14px;
+    border-radius:3px;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.4);
+    padding: clamp(28px, 6vw, 60px);
+    position:relative;
+  }
+  .letter-paper::before{
+    content:'';
+    position:absolute;
+    left:0; top:0; bottom:0; width:5px;
+    background: linear-gradient(180deg, var(--rose), var(--gold));
+    border-radius:3px 0 0 3px;
+  }
+  .letter-date{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:0.95rem;
+    color:var(--wine);
+    opacity:0.75;
+    margin-bottom:6px;
+  }
+  .letter-greeting{
+    font-family:'Sacramento', cursive;
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    color:var(--wine-deep);
+    margin-bottom:18px;
+  }
+  .letter-body p{
+    font-family:'Cormorant Garamond', serif;
+    font-size: clamp(1.08rem, 2.3vw, 1.28rem);
+    line-height:1.85;
+    color:var(--ink);
+    margin-bottom:1.2em;
+    opacity:0;
+    transform:translateY(10px);
+  }
+  .letter-body p.shown{
+    animation: fadeInLine 0.9s ease forwards;
+  }
+  @keyframes fadeInLine{
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .letter-signoff{
+    font-family:'Sacramento', cursive;
+    font-size:1.8rem;
+    color:var(--wine);
+    margin-top:14px;
+    opacity:0;
+  }
+  .letter-signoff.shown{ animation: fadeInLine 1s ease forwards; }
+
+  .continue-btn{
+    display:block;
+    margin: 46px auto 0;
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size:1.05rem;
+    color:var(--wine);
+    background:transparent;
+    border:1px solid var(--wine);
+    border-radius:30px;
+    padding:12px 30px;
+    cursor:pointer;
+    opacity:0;
+    transition: all 0.35s ease;
+  }
+  .continue-btn.shown{ animation: fadeInLine 1s ease forwards; }
+  .continue-btn:hover{ background:var(--wine); color:var(--paper); }
+
+  /* ---------- QUESTION SECTION ---------- */
+  #question-section{ flex-direction:column; text-align:center; gap:30px; }
+  .q-card{
+    background: rgba(246, 226, 194, 0.97);
+    border-radius: 18px;
+    padding: clamp(34px, 6vw, 60px) clamp(24px, 6vw, 56px);
+    max-width:560px;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.4);
+  }
+  .q-title{
+    font-family:'Sacramento', cursive;
+    font-size: clamp(1.9rem, 5vw, 2.6rem);
+    color: var(--wine-deep);
+    margin-bottom:10px;
+  }
+  .q-sub{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    color: var(--ink);
+    opacity:0.75;
+    margin-bottom:36px;
+    font-size:1.05rem;
+  }
+  .q-buttons{
+    display:flex;
+    gap:20px;
+    justify-content:center;
+    align-items:center;
+    flex-wrap:wrap;
+    position:relative;
+    min-height:70px;
+  }
+  .btn{
+    font-family:'EB Garamond', serif;
+    font-size:1.1rem;
+    padding:14px 34px;
+    border-radius:30px;
+    border:none;
+    cursor:pointer;
+    transition: transform 0.2s ease;
+  }
+  .btn-yes{
+    background: linear-gradient(135deg, var(--wine), var(--wine-deep));
+    color:#F5E6D3;
+    box-shadow: 0 10px 24px rgba(92,26,43,0.35);
+  }
+  .btn-yes:hover{ transform: scale(1.06); }
+  .btn-no{
+    background: transparent;
+    color: rgb(200, 79, 79);
+    border:1px solid var(--rose);
+    position:relative;
+    transition: transform 0.15s ease, left 0.15 ease, top 0.15s ease;
+  }
+
+  /* ---------- FINALE ---------- */
+  #finale-section{
+    flex-direction:column;
+    text-align:center;
+    gap:18px;
+  }
+  .finale-heart{
+    font-size: clamp(3rem, 8vw, 4.5rem);
+    animation: heartbeat 1.6s ease-in-out infinite;
+  }
+  @keyframes heartbeat{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.14); }
+  }
+  .finale-title{
+    font-family:'Sacramento', cursive;
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+    color:#FBF3E6;
+  }
+  .finale-sub{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+    color:#F0DCC9;
+    max-width:460px;
+  }
+
+  #confetti-layer{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:10;
+    overflow:hidden;
+  }
+  .confetti-piece{
+    position:absolute;
+    top:-5%;
+    font-size:1.4rem;
+    opacity:0.9;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall{
+    to{ transform: translateY(110vh) rotate(360deg); opacity:0.2; }
+  }
+</style>
+</head>
+<body>
+
+<div id="hearts"></div>
+<div id="confetti-layer"></div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="eyebrow">hi babe!</div>
+  <h1 class="hero-title">I'm sorry babe</h1>
+  <p class="hero-sub">There's a letter waiting for you. Open the envelope when your heart is ready.</p>
+
+  <div class="envelope-wrap" id="envelopeWrap">
+    <div class="envelope" id="envelope">
+      <div class="flap"></div>
+      <div class="seal">
+        <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.1 2.1 4.6 5.6 4c2-.3 3.9.6 5 2.2C11.7 4.6 13.6 3.7 15.6 4c3.5.6 5.2 4.1 3.6 7.7C21.5 16.4 12 21 12 21z"/></svg>
+      </div>
+    </div>
+    <div class="envelope-hint" id="envelopeHint">click the envelope to open</div>
+  </div>
+
+  <div class="scroll-cue">&#8595;</div>
+</section>
+
+<!-- LETTER -->
+<section id="letter-section">
+  <div class="letter-paper">
+    <div class="letter-date">07/12/26</div>
+    <div class="letter-greeting">My love,</div>
+    <div class="letter-body" id="letterBody">
+      <p data-line="1">I'm deeply sorry for what I've done. Words didn't seem enough, and I didn't know how to ask for your forgiveness, o I made this as a small way of expressing how I feel.</p>
+      <p data-line="2">I'm really sorry, especially for what happened last night. I've been thinking about it ever since, and I can't stop feeling guilty knowing that I hurt you again.</p>
+      <p data-line="3">I'm sorry for being this way. I'm sorry that I keep hurting you, even when that's the last thing I'd ever want to do. I know I've already said sorry so many times, and I know that no matter how many times I apologize or try to make it up to you, it doesn't take away the pain I've caused. I understand that, and I'm so sorry for putting you through that.</p>
+      <p data-line="4">You deserved to feel loved, valued, and at peace, yet I became the one who brought you pain instead. That breaks my heart because hurting you was never what I wanted. If I could take back every moment that made you cry, I would without hesitation.</p>
+      <p data-line="5">I don't expect you to forgive me right away, but I hope you know that my apology comes from the deepest part of my heart. I'm truly sorry for everything, and I hope that, someday, I can earn back the trust and happiness I took from you.</p>
+      <p data-line="6">I love you more than words could ever express. I know promises alone aren't enough, so I won't ask you to believe me just because I say I will change. Instead, I'll let my actions speak for me. I'll keep choosing to grow, to do better, and to become the kind of partner who makes you feel safe, loved, and appreciated every single day.</p>
+      <p data-line="7">Sorry Baby, Iloveeyousomuchh&hearts;</p>
+    </div>
+    <div class="letter-signoff" id="letterSignoff">Buts &hearts;</div>
+    <button class="continue-btn" id="continueBtn">Continue &rarr;</button>
+  </div>
+</section>
+
+<!-- QUESTION -->
+<section id="question-section">
+  <div class="q-card">
+    <div class="q-title">A Question for You</div>
+    <div class="q-sub">I know I've made mistakes, and I know I've hurt you. But can I ask you one thing? Do you still love me?
+</div>
+    <div class="q-buttons" id="qButtons">
+      <button class="btn btn-yes" id="yesBtn">Yes</button>
+      <button class="btn btn-no" id="noBtn">No</button>
+    </div>
+  </div>
+</section>
+
+<!-- FINALE (hidden until yes clicked) -->
+<section id="finale-section" style="display:none;">
+  <div class="finale-heart">&hearts;</div>
+  <div class="finale-title">Thank you, babe!</div>
+  <p class="finale-sub">I won't take this for granted. I promise I'll do everything I can to make sure I never hurt you like this again. I love you more than you'll ever know.
+.</p>
+</section>
+
+<script>
+  // ---------- floating hearts ----------
+  const heartsContainer = document.getElementById('hearts');
+  const heartShapes = ['&hearts;','&#10084;'];
+  function spawnHeart(){
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.innerHTML = '&hearts;';
+    const size = 12 + Math.random()*22;
+    h.style.left = Math.random()*100 + 'vw';
+    h.style.fontSize = size + 'px';
+    h.style.setProperty('--drift', (Math.random()*140-70) + 'px');
+    const duration = 9 + Math.random()*8;
+    h.style.animationDuration = duration + 's';
+    h.style.color = Math.random() > 0.5 ? 'rgba(232,185,185,0.7)' : 'rgba(201,161,90,0.55)';
+    heartsContainer.appendChild(h);
+    setTimeout(()=>h.remove(), duration*1000 + 500);
+  }
+  setInterval(spawnHeart, 550);
+  for(let i=0;i<10;i++) setTimeout(spawnHeart, i*300);
+
+  // ---------- stars ----------
+  const heroSection = document.getElementById('hero');
+  for(let i=0;i<40;i++){
+    const s = document.createElement('div');
+    s.className='star';
+    const size = Math.random()*2 + 1;
+    s.style.width = size+'px';
+    s.style.height = size+'px';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*70+'%';
+    s.style.animationDelay = (Math.random()*3)+'s';
+    heroSection.appendChild(s);
+  }
+
+  // ---------- envelope open ----------
+  const envelope = document.getElementById('envelope');
+  const envelopeWrap = document.getElementById('envelopeWrap');
+  const envelopeHint = document.getElementById('envelopeHint');
+  let opened = false;
+  envelopeWrap.addEventListener('click', ()=>{
+    if(opened) return;
+    opened = true;
+    envelope.classList.add('open');
+    envelopeHint.textContent = 'You opened it \u2014 Now, slowly scroll down';
+    setTimeout(()=>{
+      document.getElementById('letter-section').scrollIntoView({behavior:'smooth'});
+      revealLetter();
+    }, 750);
+  });
+
+  // ---------- letter reveal (typewriter-ish staggered lines) ----------
+  let letterRevealed = false;
+  function revealLetter(){
+    if(letterRevealed) return;
+    letterRevealed = true;
+    const lines = document.querySelectorAll('#letterBody p');
+    lines.forEach((line, i)=>{
+      setTimeout(()=>{ line.classList.add('shown'); }, i*900);
+    });
+    const signoff = document.getElementById('letterSignoff');
+    const btn = document.getElementById('continueBtn');
+    setTimeout(()=>{ signoff.classList.add('shown'); }, lines.length*900 + 200);
+    setTimeout(()=>{ btn.classList.add('shown'); }, lines.length*900 + 900);
+  }
+
+  document.getElementById('continueBtn').addEventListener('click', ()=>{
+    document.getElementById('question-section').scrollIntoView({behavior:'smooth'});
+  });
+
+  // ---------- evasive "no" button ----------
+  const noBtn = document.getElementById('noBtn');
+  const qButtons = document.getElementById('qButtons');
+  let dodgeCount = 0;
+  const dodgeMessages = ["Are you sure?","Try again","Talaga di mo na'ko love?","Babe, please","I can't let you do that","Please don't say no","I know I messed up, but I love you","I promise I'll do better","I can't live without you"];
+
+  function dodge(){
+    const containerRect = qButtons.getBoundingClientRect();
+    const btnRect = noBtn.getBoundingClientRect();
+    const maxX = containerRect.width - btnRect.width - 1;
+    const maxY = 9;
+    const newX = Math.random()*maxX;
+    const newY = (Math.random()*maxY) - maxY/2;
+    noBtn.style.position = 'absolute';
+    noBtn.style.left = newX + 'px';
+    noBtn.style.top = newY + 'px';
+    if(dodgeCount < dodgeMessages.length){
+      noBtn.textContent = dodgeMessages[dodgeCount];
+    }
+    dodgeCount++;
+  }
+  noBtn.addEventListener('mouseenter', dodge);
+  noBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    dodge();
+  });
+  noBtn.addEventListener('touchstart', (e)=>{
+    e.preventDefault();
+    dodge();
+  });
+
+  // ---------- yes click -> confetti + finale ----------
+  document.getElementById('yesBtn').addEventListener('click', ()=>{
+    launchConfetti();
+    document.getElementById('finale-section').style.display = 'flex';
+    setTimeout(()=>{
+      document.getElementById('finale-section').scrollIntoView({behavior:'smooth'});
+    }, 300);
+  });
+
+  function launchConfetti(){
+    const layer = document.getElementById('confetti-layer');
+    const emojis = ['&hearts;','&#10084;','\u2728','\uD83C\uDF38'];
+    for(let i=0;i<70;i++){
+      setTimeout(()=>{
+        const c = document.createElement('div');
+        c.className = 'confetti-piece';
+        c.innerHTML = emojis[Math.floor(Math.random()*emojis.length)];
+        c.style.left = Math.random()*100 + 'vw';
+        c.style.fontSize = (14 + Math.random()*16) + 'px';
+        const dur = 3 + Math.random()*2.5;
+        c.style.animationDuration = dur + 's';
+        layer.appendChild(c);
+        setTimeout(()=>c.remove(), dur*1000 + 200);
+      }, i*40);
+    }
+  }
+</script>
+
+</body>
+</html>
